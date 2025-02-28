@@ -5,6 +5,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\WelcomeMail;
 
 class RegistrationController extends Controller
 {
@@ -25,11 +27,12 @@ class RegistrationController extends Controller
             return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        User::create([
+        $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
+        Mail::to($user->email)->queue(new WelcomeMail($user));
 
         return redirect()->route('login')->with('success', 'Registration successful! Please log in.');
     }
